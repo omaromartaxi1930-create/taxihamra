@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'dart:async';
 
-void main() {
-  runApp(const TaxiHamraApp());
-}
+void main() => runApp(const TaxiHamraApp());
 
 class TaxiHamraApp extends StatelessWidget {
   const TaxiHamraApp({super.key});
@@ -14,106 +9,70 @@ class TaxiHamraApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'طاكسي حمرا - فاس',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-        useMaterial3: true,
+      title: 'طاكسي حمرا', // [cite: 3]
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF1A1415), // اللون الداكن للتطبيق [cite: 158]
       ),
-      home: const WelcomeScreen(),
+      home: const HomePage(),
     );
   }
 }
 
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool isSearching = false; // حالة البحث عن سائق [cite: 110]
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFE53935), Color(0xFFFFB300)],
+      appBar: AppBar(
+        title: const Text('طاكسي حمرا - فاس'), [cite: 3]
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.warning_amber_rounded, color: Colors.red),
+            onPressed: () => _triggerSOS(), // نداء الاستغاثة [cite: 204]
           ),
-        ),
+        ],
+      ),
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Hero(
-              tag: 'logo',
-              child: Container(
-                padding: const EdgeInsets.all(25),
-                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.local_taxi, size: 80, color: Color(0xFFE53935)),
+            if (isSearching) 
+              const CircularProgressIndicator(color: Colors.red), [cite: 110]
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD90429), // لون طاكسي حمرا [cite: 52]
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+              ),
+              onPressed: () {
+                setState(() => isSearching = !isSearching);
+              },
+              child: Text(
+                isSearching ? 'جاري البحث...' : 'اطلب تاكسي الآن', [cite: 3, 110]
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-            const SizedBox(height: 20),
-            const Text("طاكسي حمرا - فاس", 
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 60),
-            _buildMainButton(context, "طلب طاكسي (زبون)", Icons.person_pin_circle, const CustomerMapScreen()),
-            const SizedBox(height: 15),
-            _buildMainButton(context, "دخول المهنيين (شيفور)", Icons.directions_car, const DriverOrdersScreen()),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMainButton(BuildContext context, String title, IconData icon, Widget nextScreen) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: ElevatedButton.icon(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => nextScreen)),
-        icon: Icon(icon, color: Colors.white),
-        label: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1A1A1A),
-          minimumSize: const Size(double.infinity, 60),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        ),
+  void _triggerSOS() {
+    // محاكاة إرسال الاستغاثة كما في الكود الأصلي [cite: 178]
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('تم إرسال نداء SOS لجميع السائقين'), [cite: 143]
+        backgroundColor: Colors.red,
       ),
-    );
-  }
-}
-
-class CustomerMapScreen extends StatefulWidget {
-  const CustomerMapScreen({super.key});
-  @override
-  State<CustomerMapScreen> createState() => _CustomerMapScreenState();
-}
-
-class _CustomerMapScreenState extends State<CustomerMapScreen> {
-  final Completer<GoogleMapController> _controller = Completer();
-  static const CameraPosition _fesInitialPos = CameraPosition(target: LatLng(34.0333, -5.0000), zoom: 14);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("حدد موقعك"), backgroundColor: Colors.red[900], foregroundColor: Colors.white),
-      body: GoogleMap(
-        initialCameraPosition: _fesInitialPos,
-        onMapCreated: (GoogleMapController controller) => _controller.complete(controller),
-        myLocationEnabled: true,
-      ),
-    );
-  }
-}
-
-class DriverOrdersScreen extends StatefulWidget {
-  const DriverOrdersScreen({super.key});
-  @override
-  State<DriverOrdersScreen> createState() => _DriverOrdersScreenState();
-}
-
-class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("طلبات مدينة فاس"), backgroundColor: Colors.black, foregroundColor: Colors.white),
-      body: const Center(child: Text("في انتظار الطلبات...")),
     );
   }
 }
