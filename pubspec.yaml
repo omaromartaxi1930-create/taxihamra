@@ -1,16 +1,15 @@
 name: taxi_hamra
-description: A new Flutter project.
-publish_to: 'none'
+description: تطبيق طاكسي حمرا لمدينة فاس
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.11.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  google_maps_flutter: ^2.5.3
-  geolocator: ^10.1.0
+  [cite_start]google_maps_flutter: ^2.5.0 # لعرض خريطة فاس [cite: 147]
+  [cite_start]geolocator: ^10.1.0 # لتحديد موقع السائق لإرسال SOS [cite: 177]
 
 flutter:
   uses-material-design: true
