@@ -9,12 +9,9 @@ class TaxiHamraApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'طاكسي حمرا',
-      // الثيم الداكن المستوحى من ملفاتك الأصلية
       theme: ThemeData.dark().copyWith(
         primaryColor: const Color(0xFFD90429),
         scaffoldBackgroundColor: const Color(0xFF1A1415),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD90429), brightness: Brightness.dark),
       ),
       home: const HomePage(),
     );
@@ -29,29 +26,47 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool isSearching = false; // حالة البحث عن سائق
+  bool isSearching = false;
+  double balance = 450.50; // رصيد افتراضي بالدرهم
 
-  // وظيفة نداء الاستغاثة SOS
-  void _handleSOS() {
-    showDialog(
+  // وظيفة إظهار المحفظة (Wallet Bottom Sheet)
+  void _showWallet() {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1415),
-        title: const Text('نداء استغاثة SOS', textAlign: TextAlign.right, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-        content: const Text('هل أنت في حالة خطر؟ سيتم إرسال موقعك فوراً إلى أقرب سائقين ومركز المساعدة.', textAlign: TextAlign.right),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('تم إرسال نداء الاستغاثة بنجاح', textAlign: TextAlign.center), backgroundColor: Colors.red),
-              );
-            },
-            child: const Text('إرسال نداء'),
-          ),
-        ],
+      backgroundColor: const Color(0xFF1A1415),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(25),
+        height: 300,
+        child: Column(
+          children: [
+            Container(width: 50, height: 5, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10))),
+            const SizedBox(height: 25),
+            const Text('محفظتي', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 30),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('الرصيد الحالي:', style: TextStyle(fontSize: 18)),
+                  Text('$balance MAD', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.greenAccent)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white10),
+              child: const Text('إغلاق'),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -60,62 +75,33 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('طاكسي حمرا - فاس', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
+        title: const Text('طاكسي حمرا'),
+        leading: IconButton(icon: const Icon(Icons.account_balance_wallet, color: Colors.amber), onPressed: _showWallet), // زر المحفظة
         actions: [
-          IconButton(
-            icon: const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 30),
-            onPressed: _handleSOS,
-          ),
+          IconButton(icon: const Icon(Icons.warning_amber_rounded, color: Colors.red), onPressed: () {}),
         ],
       ),
       body: Stack(
         children: [
-          // خلفية بسيطة تمثل مكان الخريطة
-          const Center(
-            child: Opacity(
-              opacity: 0.1,
-              child: Icon(Icons.map_rounded, size: 200),
-            ),
-          ),
-          
-          // لوحة التحكم السفلية (Action Panel)
+          const Center(child: Opacity(opacity: 0.1, child: Icon(Icons.map_rounded, size: 200))),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(25),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.8),
+                color: Colors.black.withOpacity(0.9),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white10),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (isSearching) ...[
-                    const CircularProgressIndicator(color: Color(0xFFD90429)),
-                    const SizedBox(height: 15),
-                    const Text('جاري البحث عن أقرب طاكسي حمرا...', style: TextStyle(fontSize: 16)),
-                  ] else ...[
-                    const Text('مرحباً بك! أين وجهتك اليوم؟', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ],
-                  const SizedBox(height: 25),
                   SizedBox(
                     width: double.infinity,
                     height: 60,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD90429),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        elevation: 10,
-                      ),
-                      onPressed: () {
-                        setState(() => isSearching = !isSearching);
-                      },
-                      child: Text(
-                        isSearching ? 'إلغاء الطلب' : 'اطلب تاكسي الآن',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD90429)),
+                      onPressed: () => setState(() => isSearching = !isSearching),
+                      child: Text(isSearching ? 'إلغاء الطلب' : 'اطلب تاكسي الآن', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
